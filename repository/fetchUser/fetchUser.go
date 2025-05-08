@@ -1,4 +1,4 @@
-package internal_fetchUser
+package repository_fetchUser
 
 import (
 	"encoding/json"
@@ -29,7 +29,7 @@ func fetchUserCollection() (*data_pattern.UserCollection, error) {
 	return &userCol, nil
 }
 
-func GetUserCredentials(userCol *data_pattern.UserCollection) data_pattern.UserCredentials {
+func userCredentials(userCol *data_pattern.UserCollection) data_pattern.UserCredentials {
 	userCredentials := data_pattern.UserCredentials{}
 	singleUser := userCol.Results[0]
 
@@ -38,4 +38,14 @@ func GetUserCredentials(userCol *data_pattern.UserCollection) data_pattern.UserC
 	userCredentials.Username = singleUser.Login.Username
 
 	return userCredentials
+}
+
+func GetAndPrepareUserData() (*data_pattern.UserCredentials, error) {
+	userCollection, err := fetchUserCollection()
+	if err != nil {
+		return nil, err
+	}
+
+	userCred := userCredentials(userCollection)
+	return &userCred, nil
 }

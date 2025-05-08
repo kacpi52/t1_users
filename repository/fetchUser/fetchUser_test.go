@@ -1,4 +1,4 @@
-package internal_fetchUser
+package repository_fetchUser
 
 import "testing"
 
@@ -16,7 +16,7 @@ func TestFetchUserCollection(t *testing.T) {
 	}
 }
 
-func TestGetUserCredentials(t *testing.T) {
+func TestUserCredentials(t *testing.T) {
 	userCol, err := fetchUserCollection()
 
 	if err != nil {
@@ -29,7 +29,7 @@ func TestGetUserCredentials(t *testing.T) {
 		t.Errorf(`error, user name is empty`)
 	}
 
-	userCredentials := GetUserCredentials(userCol)
+	userCredentials := userCredentials(userCol)
 
 	if userCol.Results[0].Name.First != userCredentials.Name {
 		t.Errorf(`error, user name is not matching`)
@@ -40,4 +40,20 @@ func TestGetUserCredentials(t *testing.T) {
 	if userCol.Results[0].Login.Username != userCredentials.Username {
 		t.Errorf(`error, user username is not matching`)
 	}
+}
+
+func TestGetAndPrepareUserCredentials(t *testing.T) {
+	userCred, err := GetAndPrepareUserData()
+
+	if err != nil {
+		t.Errorf(`error, failed to fetch user %e`, err)
+	}
+	
+	if userCred.Name == "" {
+		t.Errorf(`error, user name is empty`)
+	}
+	if userCred.Username == "" {
+		t.Errorf(`error, userName name is empty`)
+	}
+
 }
