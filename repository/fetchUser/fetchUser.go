@@ -2,6 +2,7 @@ package repository_fetchUser
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -43,7 +44,10 @@ func userCredentials(userCol *data_pattern.UserCollection) data_pattern.UserCred
 func GetAndPrepareUserData() (*data_pattern.UserCredentials, error) {
 	userCollection, err := fetchUserCollection()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch user collection: %w", err)
+	}
+	if len(userCollection.Results) == 0 {
+		return nil, fmt.Errorf("empty user collection from API")
 	}
 
 	userCred := userCredentials(userCollection)

@@ -1,7 +1,7 @@
 package process
 
 import (
-	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -10,19 +10,15 @@ import (
 	repository_fetchUser "github.com/kacpi52/t1_users/repository/fetchUser"
 )
 
-func GetUAndCreteUserConcurrently() {
+func GetAndCreateUserConcurrently() *data_pattern.UserCredentialsCollection {
 	successChan := make(chan bool)
 	successCount := 0
-	successAddedUsersArray := []data_pattern.UserCredentials{}
+	successAddedUsersCol := &data_pattern.UserCredentialsCollection{}
 
 	go func() {
 		for range successChan {
 			successCount++
-			fmt.Printf("Created %d/%d users \n", successCount, data_pattern.USER_COUNT_TARGET)
-			if successCount >= data_pattern.USER_COUNT_TARGET {
-				close(successChan)
-				return
-			}
+			log.Printf("Created %d/%d users", successCount, data_pattern.USER_COUNT_TARGET)
 		}
 	}()
 
@@ -38,17 +34,24 @@ func GetUAndCreteUserConcurrently() {
 				defer wg.Done()
 				user, err := repository_fetchUser.GetAndPrepareUserData()
 				if err != nil {
+					log.Printf("worker %d: error fetching user: %v", workerId, err)
 					return
 				}
 				err = repository_createUser.SaveUserToLinux(*user)
 				if err == nil {
-					successAddedUsersArray = append(successAddedUsersArray, *user)
+					successAddedUsersCol.Mutex.Lock()
+					successAddedUsersCol.Collection = append(successAddedUsersCol.Collection, *user)
+					successAddedUsersCol.Mutex.Unlock()
 					successChan <- true
 				}
 			}(i)
 		}
-		
+
 		wg.Wait()
 		time.Sleep(data_pattern.FETCH_TIME_DELAY)
 	}
+
+	close(successChan)
+
+	return successAddedUsersCol
 }
