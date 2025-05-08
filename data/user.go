@@ -1,5 +1,11 @@
 package data_pattern
 
+import "sync"
+
+type UserCredentialsCollection struct {
+	Collection []UserCredentials
+	sync.Mutex
+}
 type UserCredentials struct {
 	Name     string `json:"name"`
 	Surname  string `json:"surname"`
